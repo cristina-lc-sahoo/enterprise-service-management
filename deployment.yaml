@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-service-management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: enterprise-service-management
+  template:
+    metadata:
+      labels:
+        app: enterprise-service-management
+    spec:
+      containers:
+        - name: enterprise-service-management
+          image: enterprise-service-management:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: database-config

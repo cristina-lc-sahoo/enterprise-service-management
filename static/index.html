@@ -1,0 +1,471 @@
+<!--HTML-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Service Management</title>
+</head>
+
+<body>
+
+    <h1>Enterprise Service Management</h1>
+    <p>Support Ticket Management System</p>
+
+    <hr>
+
+<h2>Create Ticket</h2>
+
+<form id="createTicketForm">
+
+    <label>Title:</label>
+    <input type="text" id="ticketTitle" required>
+
+    <br><br>
+
+    <label>Description:</label>
+    <textarea id="ticketDescription"></textarea>
+
+    <br><br>
+
+    <label>Priority:</label>
+    <select id="ticketPriority">
+        <option value="Low">Low</option>
+        <option value="Medium" selected>Medium</option>
+        <option value="High">High</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Create Ticket</button>
+
+</form>
+
+<p id="ticketMessage"></p>
+
+<hr>
+
+<h2>View Tickets</h2>
+
+<button type="button" id="loadTicketsButton">Load Tickets</button>
+
+<div id="ticketsList"></div>
+
+<hr>
+
+<h2>Update Ticket</h2>
+
+<form id="updateTicketForm">
+
+    <label>Ticket ID:</label>
+    <input type="number" id="updateTicketId" required>
+
+    <br><br>
+
+    <label>Status:</label>
+    <select id="updateTicketStatus">
+        <option value="">Leave unchanged</option>
+        <option value="Open">Open</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+        <option value="Closed">Closed</option>
+    </select>
+
+    <br><br>
+
+    <label>Priority:</label>
+    <select id="updateTicketPriority">
+        <option value="">Leave unchanged</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Update Ticket</button>
+
+</form>
+
+<p id="updateTicketMessage"></p>
+
+<hr>
+
+<h2>Create User</h2>
+
+<form id="createUserForm">
+
+    <label>Username:</label>
+    <input type="text" id="username" required>
+
+    <br><br>
+
+    <label>Email:</label>
+    <input type="email" id="userEmail" required>
+
+    <label for="userPassword">Password:</label>
+    <input
+    type="password"
+    id="userPassword"
+    required
+    >
+
+    <br><br>
+
+    <label>Role:</label>
+    <select id="userRole">
+        <option value="employee">Employee</option>
+        <option value="support">Support</option>
+        <option value="manager">Manager</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Create User</button>
+
+</form>
+
+<p id="userMessage"></p>
+
+<hr>
+
+<h2>View Users</h2>
+
+<button type="button" id="loadUsersButton">Load Users</button>
+
+<div id="usersList"></div>
+
+<hr>
+
+<h2>Update User</h2>
+
+<form id="updateUserForm">
+
+    <label>User ID:</label>
+    <input type="number" id="updateUserId" required>
+
+    <br><br>
+
+    <label>Username:</label>
+    <input type="text" id="updateUsername">
+
+    <br><br>
+
+    <label>Email:</label>
+    <input type="email" id="updateUserEmail">
+
+    <br><br>
+
+    <label>Role:</label>
+    <select id="updateUserRole">
+        <option value="">Leave unchanged</option>
+        <option value="employee">Employee</option>
+        <option value="support">Support</option>
+        <option value="manager">Manager</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Update User</button>
+
+</form>
+
+<p id="updateUserMessage"></p>
+
+<hr>
+
+<h2>Assign Ticket</h2>
+
+<form id="assignTicketForm">
+
+    <label>Ticket ID:</label>
+    <input type="number" id="assignTicketId" required>
+
+    <br><br>
+
+    <label>Support Engineer User ID:</label>
+    <input type="number" id="assignEngineerId" required>
+
+    <br><br>
+
+    <button type="submit">Assign Ticket</button>
+
+</form>
+
+<p id="assignTicketMessage"></p>
+
+<hr>
+
+<h2>View Engineer Tickets</h2>
+
+<form id="engineerTicketsForm">
+
+    <label>Support Engineer User ID:</label>
+    <input type="number" id="engineerTicketsId" required>
+
+    <br><br>
+
+    <button type="submit">Load Engineer Tickets</button>
+
+</form>
+
+<div id="engineerTicketsList"></div>
+
+<hr>
+
+<!--SCRIPT-->
+
+<script>
+
+    const API_URL = "http://localhost:8000";
+
+    document.getElementById("createTicketForm").addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const ticketData = {
+            title: document.getElementById("ticketTitle").value,
+            description: document.getElementById("ticketDescription").value,
+            priority: document.getElementById("ticketPriority").value
+        };
+
+        const response = await fetch(`${API_URL}/tickets`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(ticketData)
+        });
+
+        const result = await response.json();
+
+        document.getElementById("ticketMessage").textContent =
+            `Ticket created successfully. ID: ${result.ticket_id}`;
+
+        document.getElementById("createTicketForm").reset();
+
+    });
+
+document.getElementById("loadTicketsButton").addEventListener("click", async function() {
+
+    const response = await fetch(`${API_URL}/tickets`);
+
+    const tickets = await response.json();
+
+    const ticketsList = document.getElementById("ticketsList");
+
+    ticketsList.innerHTML = "";
+
+    tickets.forEach(ticket => {
+
+        const ticketItem = document.createElement("p");
+
+        ticketItem.textContent =
+        `ID: ${ticket.ticket_id} | ${ticket.title} | Status: ${ticket.status} | Priority: ${ticket.priority} | Assigned To User ID: ${ticket.assigned_to ?? "Unassigned"}`;
+
+        ticketsList.appendChild(ticketItem);
+
+    });
+
+});
+
+document.getElementById("updateTicketForm").addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const ticketId = document.getElementById("updateTicketId").value;
+
+    const ticketData = {};
+
+    const status = document.getElementById("updateTicketStatus").value;
+    const priority = document.getElementById("updateTicketPriority").value;
+
+    if (status) {
+        ticketData.status = status;
+    }
+
+    if (priority) {
+        ticketData.priority = priority;
+    }
+
+    const response = await fetch(`${API_URL}/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(ticketData)
+    });
+
+    const result = await response.json();
+
+    document.getElementById("updateTicketMessage").textContent =
+        result.ticket_id
+            ? `Ticket ${result.ticket_id} updated successfully.`
+            : result.error;
+
+});
+
+
+document.getElementById("createUserForm").addEventListener("submit", async function(event) {
+
+event.preventDefault();
+
+const userData = {
+    username: document.getElementById("username").value,
+    email: document.getElementById("userEmail").value,
+    password: document.getElementById("userPassword").value,
+    role: document.getElementById("userRole").value
+};
+
+const response = await fetch(`${API_URL}/users`, {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(userData)
+});
+
+const result = await response.json();
+
+document.getElementById("userMessage").textContent =
+    result.user_id
+        ? `User created successfully. ID: ${result.user_id}`
+        : JSON.stringify(result);
+
+document.getElementById("createUserForm").reset();
+
+});
+
+document.getElementById("updateUserForm").addEventListener("submit", async function(event) {
+
+event.preventDefault();
+
+const userId = document.getElementById("updateUserId").value;
+
+const userData = {};
+
+const username = document.getElementById("updateUsername").value;
+const email = document.getElementById("updateUserEmail").value;
+const role = document.getElementById("updateUserRole").value;
+
+if (username) {
+    userData.username = username;
+}
+
+if (email) {
+    userData.email = email;
+}
+
+if (role) {
+    userData.role = role;
+}
+
+const response = await fetch(`${API_URL}/users/${userId}`, {
+    method: "PATCH",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(userData)
+});
+
+const result = await response.json();
+
+document.getElementById("updateUserMessage").textContent =
+    result.user_id
+        ? `User ${result.user_id} updated successfully.`
+        : result.error;
+
+});
+
+document.getElementById("loadUsersButton").addEventListener("click", async function() {
+
+const response = await fetch(`${API_URL}/users`);
+
+const users = await response.json();
+
+const usersList = document.getElementById("usersList");
+
+usersList.innerHTML = "";
+
+users.forEach(user => {
+
+    const userItem = document.createElement("p");
+
+    userItem.textContent =
+        `ID: ${user.user_id} | Username: ${user.username} | Email: ${user.email} | Role: ${user.role}`;
+
+    usersList.appendChild(userItem);
+
+});
+
+});
+
+document.getElementById("assignTicketForm").addEventListener("submit", async function(event) {
+
+event.preventDefault();
+
+const ticketId = document.getElementById("assignTicketId").value;
+const engineerId = document.getElementById("assignEngineerId").value;
+
+const assignmentData = {
+    assigned_to: parseInt(engineerId)
+};
+
+const response = await fetch(`${API_URL}/tickets/${ticketId}/assign`, {
+    method: "PATCH",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(assignmentData)
+});
+
+const result = await response.json();
+
+document.getElementById("assignTicketMessage").textContent =
+    result.ticket_id
+        ? `Ticket ${result.ticket_id} assigned to user ${result.assigned_to}.`
+        : result.error;
+
+});
+
+document.getElementById("engineerTicketsForm").addEventListener("submit", async function(event) {
+
+event.preventDefault();
+
+const engineerId = document.getElementById("engineerTicketsId").value;
+
+const response = await fetch(`${API_URL}/users/${engineerId}/tickets`);
+
+const tickets = await response.json();
+
+const ticketsList = document.getElementById("engineerTicketsList");
+
+ticketsList.innerHTML = "";
+
+if (tickets.length === 0) {
+    ticketsList.textContent = "No tickets assigned to this engineer.";
+    return;
+}
+
+tickets.forEach(ticket => {
+
+    const ticketItem = document.createElement("p");
+
+    ticketItem.textContent =
+        `ID: ${ticket.ticket_id} | ${ticket.title} | Status: ${ticket.status} | Priority: ${ticket.priority}`;
+
+    ticketsList.appendChild(ticketItem);
+
+});
+
+});
+
+</script>
+
+</body>
+
+</html>
+
+
